@@ -1,5 +1,7 @@
 import { MemberStatus, MemberType } from "../enums/member";
 import { ObjectId } from "mongoose";
+import { Request } from "express";
+import { Session } from "express-session";
 export interface Member {
   _id: ObjectId;
   memberType: MemberType;
@@ -30,4 +32,10 @@ export interface MemberInput {
 export interface LoginInput {
   memberIdentity: string;
   memberPassword: string;
+}
+export interface AdminRequest extends Request {
+  member: Member;
+  session: Session & { member: Member };
+  file: Express.Multer.File;
+  files: Express.Multer.File[];
 }
