@@ -62,7 +62,6 @@ adminController.processLogin = async (req: AdminRequest, res: Response) => {
     req.session.save(function () {
       res.redirect("/admin/product/all");
     });
-    res.send(result);
   } catch (err) {
     console.error("Error  processLogin page:", err);
     const message =
