@@ -23,4 +23,16 @@ routerAdmin.get("/check-me", adminController.checkout);
 
 //USER
 
+routerAdmin.get(
+  "/user/all",
+  adminController.verifyRestaurant,
+  adminController.getUsers,
+);
+
+routerAdmin.post(
+  "/user/edit",
+  adminController.verifyRestaurant,
+  adminController.updateChosenUser,
+);
+
 export default routerAdmin;

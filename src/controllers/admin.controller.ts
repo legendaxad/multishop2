@@ -1,5 +1,5 @@
 import { T } from "../libs/types/common";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import MemberService from "../model/model.service";
 import { AdminRequest, LoginInput, MemberInput } from "../libs/types/member";
 import { MemberType } from "../libs/enums/member";
@@ -83,6 +83,30 @@ adminController.logout = async (req: AdminRequest, res: Response) => {
     res.redirect("/admin");
   }
 };
+
+adminController.getUsers = async (req: Request, res: Response) => {
+  try {
+    console.log("getusers");
+    const result = await memberService.getUsers();
+    console.log("users:", result);
+    res.render("users", { users: result });
+  } catch (err) {
+    console.error("Error  getUsers page:", err);
+    res.redirect("/admin/login");
+  }
+};
+adminController.updateChosenUser = async (req: Request, res: Response) => {
+  try {
+    console.log("updateChosenUser");
+
+    const result = await memberService.updateChosenUser(req.body);
+    res.status(HttpCode.OK).json({ data: result });
+  } catch (err) {
+    console.error("Error  updateChosenUser page:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
 adminController.checkout = async (req: AdminRequest, res: Response) => {
   try {
     if (req.session?.member)
@@ -93,6 +117,21 @@ adminController.checkout = async (req: AdminRequest, res: Response) => {
   } catch (err) {
     console.error("Error  checkout page:", err);
     res.redirect("/admin");
+  }
+};
+adminController.verifyRestaurant = async (
+  req: AdminRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (req.session?.member?.memberType === MemberType.SHOP) {
+    req.member = req.session.member;
+    next();
+  } else {
+    const message = Message.NOT_AUTHENTICATED;
+    res.send(
+      `<script>alert('Welcome, ${message}!'); window.location.replace('/admin/login')</script>`,
+    );
   }
 };
 
