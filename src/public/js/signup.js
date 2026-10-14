@@ -1,48 +1,90 @@
-console.log("Signup frontend javascript file");
-$(function () {
-      const fileTarget = $(".file-box .upload-hidden")
-      let filename;
-      fileTarget.on("change", function () {
-            if (window.FileReader) {
-                  const uploadFile = $(this)[0].files[0]
-                  const fileType = uploadFile["type"];
-                  const validImageType = ["image/jpg", "image/jpeg", "image/png",]
-                  if (!validImageType.includes(fileType)) {
-                        alert("Please insert only jpg,jpeg,png formats!")
-                  }
-                  else {
-                        if (uploadFile) {
-                              console.log(URL.createObjectURL(uploadFile))
-                              $(".upload-img-frame")
-                                    .attr("src", URL.createObjectURL(uploadFile))
-                                    .addClass("success")
-                        }
-                        filename = $(this)[0].files[0].name;
-                  }
-                  $(this).siblings(".upload-name").val(filename)
-            }
-      })
-})
+(() => {
+  const form = document.querySelector(".sm-auth-card");
+  const imageInput = form?.querySelector(".member-image");
+  const imagePreview = form?.querySelector(".upload-img-frame");
+  const password = form?.querySelector(".member-password");
+  const confirmPassword = form?.querySelector(".confirm-password");
+  const submitButton = form?.querySelector('button[type="submit"]');
+  let previewUrl;
 
-function validateSignupForm() {
-      const memberNick = $(".member-nick").val();
-      const memberPhone = $(".member-phone").val();
-      const memberPassword = $(".member-password").val();
-      const confirmPassword = $(".confirm-password").val();
-      console.log(memberPassword)
-      console.log(confirmPassword)
+  if (!(form instanceof HTMLFormElement)) return;
 
-      if (memberNick === "" || memberPhone === "" || memberPassword === "" || confirmPassword === "") {
-            alert("Please insert all required inputs")
-            return false
-      }
-      if (memberPassword !== confirmPassword) {
-            alert("Password differs, please check!")
-            return false
-      }
-      const memberImage = $(".member-image").get(0).files[0] ? $(".member-image").get(0).files[0].name : null;
-      if (!memberImage) {
-            alert("Please insert restaurant image!")
-            return false
-      }
-}
+  const isSupportedImage = (file) =>
+    file &&
+    (["image/jpeg", "image/png"].includes(file.type) ||
+      /\.(jpe?g|png)$/i.test(file.name));
+
+  if (
+    imageInput instanceof HTMLInputElement &&
+    imagePreview instanceof HTMLImageElement
+  ) {
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files?.[0];
+      imageInput.setCustomValidity(
+        file && !isSupportedImage(file)
+          ? "Choose a JPG, JPEG, or PNG image."
+          : "",
+      );
+
+      if (!file || !isSupportedImage(file)) return;
+
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = URL.createObjectURL(file);
+      imagePreview.src = previewUrl;
+    });
+  }
+
+  const validatePasswords = () => {
+    if (
+      password instanceof HTMLInputElement &&
+      confirmPassword instanceof HTMLInputElement
+    ) {
+      confirmPassword.setCustomValidity(
+        confirmPassword.value && password.value !== confirmPassword.value
+          ? "Passwords do not match."
+          : "",
+      );
+    }
+  };
+
+  password?.addEventListener("input", validatePasswords);
+  confirmPassword?.addEventListener("input", validatePasswords);
+
+  window.validateSignupForm = () => {
+    validatePasswords();
+
+    if (
+      imageInput instanceof HTMLInputElement &&
+      (!imageInput.files?.[0] || !isSupportedImage(imageInput.files[0]))
+    ) {
+      imageInput.setCustomValidity(
+        imageInput.files?.[0]
+          ? "Choose a JPG, JPEG, or PNG image."
+          : "Choose a store profile image.",
+      );
+    }
+
+    return form.reportValidity();
+  };
+
+  form.addEventListener("submit", (event) => {
+    if (!window.validateSignupForm()) {
+      event.preventDefault();
+      return;
+    }
+
+    if (submitButton instanceof HTMLButtonElement) {
+      submitButton.disabled = true;
+      submitButton.textContent = "CREATING ACCOUNT…";
+      form.setAttribute("aria-busy", "true");
+    }
+  });
+
+  window.addEventListener(
+    "beforeunload",
+    () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    },
+    { once: true },
+  );
+})();

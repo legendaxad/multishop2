@@ -87,7 +87,6 @@ adminController.getUsers = async (req: Request, res: Response) => {
   try {
     console.log("getusers");
     const result = await memberService.getUsers();
-    console.log("users:", result);
     res.render("users", { users: result });
   } catch (err) {
     console.error("Error  getUsers page:", err);

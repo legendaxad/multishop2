@@ -1,111 +1,112 @@
 <%- include('includes/header') %>
-
-<link rel="stylesheet" type="text/css" href="/css/signup.css" />
+<%- include('includes/solemate-theme') %>
 
 <body>
-  <div class="signup-container">
-    <form
-      onsubmit="return validateSignupForm();"
-      action="/admin/signup"
-      method="POST"
-      enctype="multipart/form-data"
-    >
-      <div class="signup-frame" style="width: 650px">
-        <div class="signup-top">
-          <span>Signup</span>
-          <div>Go back <a href="/admin" style="color: #6440fb">Home</a></div>
-          <p>
-            Already signed up?
-            <a href="/admin/login" style="color: #6440fb">Login</a>
-          </p>
-        </div>
+  <main class="sm-auth">
+    <aside class="sm-auth-panel">
+      <a class="sm-brand" href="/admin">
+        <span class="sm-brand-mark">SM</span>
+        <span class="sm-brand-name">SoleMate<small>Store admin</small></span>
+      </a>
+      <div class="sm-auth-story">
+        <span class="sm-eyebrow">Build your workspace</span>
+        <h1>Set up shop.<br />Step forward.</h1>
+        <p>
+          Create your store profile to start managing sneaker listings and
+          customer accounts.
+        </p>
+        <span class="sm-auth-stamp" aria-hidden="true">MADE FOR<br />STORE TEAMS</span>
+      </div>
+    </aside>
 
-        <div class="sign-input-frame" style="justify-content: space-between">
-          <div class="sign-up-frame">
-            <label>Restaurant *</label>
+    <section class="sm-auth-side">
+      <form
+        class="sm-auth-card"
+        onsubmit="return validateSignupForm();"
+        action="/admin/signup"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <span class="sm-eyebrow">New store admin</span>
+        <h2>Create your account.</h2>
+        <p class="sm-auth-intro">Set up your SoleMate store admin profile.</p>
+
+        <div class="sm-form-grid">
+          <div class="sm-field">
+            <label for="member-nick">Shop name *</label>
             <input
+              id="member-nick"
               type="text"
               name="memberNick"
               class="member-nick"
-              placeholder="Username"
-              value=""
+              placeholder="Your shop name"
+              autocomplete="organization"
+              required
             />
           </div>
-          <div class="sign-up-frame">
-            <label>Phone *</label>
+          <div class="sm-field">
+            <label for="member-phone">Phone *</label>
             <input
-              type="text"
+              id="member-phone"
+              type="tel"
               name="memberPhone"
               class="member-phone"
-              placeholder="Phone"
-              value=""
+              placeholder="Phone number"
+              autocomplete="tel"
+              required
             />
           </div>
-        </div>
-        <div class="sign-input-frame" style="justify-content: space-between">
-          <div class="sign-up-frame">
-            <label>Password *</label>
+          <div class="sm-field">
+            <label for="member-password">Password *</label>
             <input
+              id="member-password"
               type="password"
               name="memberPassword"
               class="member-password"
-              placeholder="Password"
-              value=""
+              placeholder="Create a password"
+              autocomplete="new-password"
+              required
             />
           </div>
-          <div class="sign-up-frame">
-            <label>Repeat password *</label>
+          <div class="sm-field">
+            <label for="confirm-password">Confirm password *</label>
             <input
+              id="confirm-password"
               type="password"
               name="confirmPassword"
               class="confirm-password"
-              placeholder="Repeat password"
-              value=""
+              placeholder="Repeat your password"
+              autocomplete="new-password"
+              required
             />
           </div>
         </div>
 
-        <div class="signup-input-frame">
-          <div class="media-frame">
-            <img class="upload-img-frame" src="/img/default.jpeg" />
-            <div class="upload-container">
-              <span class="media-text">Product image</span>
-              <div
-                class="file-box bs3-primary preview-image"
-                style="margin-top: 25px; display: flex"
-              >
-                <input
-                  class="upload-name"
-                  value="Choose image"
-                  disabled="disabled"
-                />
-                <label for="input-file" class="file-input-label"
-                  >Upload Image</label
-                >
-                <input
-                  type="file"
-                  id="input-file"
-                  class="upload-hidden form-control-file member-image"
-                  name="memberImage"
-                />
-              </div>
-              <p class="thumbnail-desc">
-                Please upload restaurant image.<br />
-                Attention only:.jpg, .jpeg, or .png. <br />
-                formats allowed!
-              </p>
-            </div>
+        <div class="sm-image-upload">
+          <img class="sm-image-preview upload-img-frame" src="/img/default.jpeg" alt="Store profile preview" />
+          <div class="sm-upload-control">
+            <label for="input-file">Store profile image *</label>
+            <input
+              type="file"
+              id="input-file"
+              class="upload-hidden form-control-file member-image"
+              name="memberImage"
+              accept=".jpg,.jpeg,.png"
+              required
+            />
+            <p>Choose a JPG, JPEG, or PNG image.</p>
           </div>
         </div>
 
-        <input name="memberType" value="RESTAURANT" hidden />
-
-        <button class="signup-btn btn" name="signup" type="submit">
-          Signup
-        </button>
-      </div>
-    </form>
-  </div>
+        <input name="memberType" value="SHOP" hidden />
+        <button class="sm-button sm-button--lime" name="signup" type="submit">CREATE STORE ACCOUNT</button>
+        <p class="sm-auth-meta">
+          Already have an account? <a href="/admin/login">Sign in</a>
+          <br /><a href="/admin">Back to admin home</a>
+        </p>
+      </form>
+    </section>
+  </main>
 
   <script type="text/javascript" src="/js/signup.js"></script>
 </body>

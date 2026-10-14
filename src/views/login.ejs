@@ -1,45 +1,64 @@
 <%- include('includes/header') %>
-
-<link rel="stylesheet" type="text/css" href="/css/login.css" />
+<%- include('includes/solemate-theme') %>
 
 <body>
-  <form class="login-container" action="/admin/login" METHOD="POST">
-    <div class="login-frame">
-      <div class="login-top">
-        <span>Enter</span>
-        <div>Go back <a href="/admin" style="color: #6440fb">Home</a></div>
+  <main class="sm-auth">
+    <aside class="sm-auth-panel">
+      <a class="sm-brand" href="/admin">
+        <span class="sm-brand-mark">SM</span>
+        <span class="sm-brand-name">SoleMate<small>Store admin</small></span>
+      </a>
+      <div class="sm-auth-story">
+        <span class="sm-eyebrow">The SoleMate workspace</span>
+        <h1>Your store.<br />Your next move.</h1>
         <p>
-          Not registered yet?
-          <a href="/admin/signup" style="color: #6440fb">Signup</a>
+          Sign in to keep your sneaker listings and customer accounts in good
+          shape.
         </p>
+        <span class="sm-auth-stamp" aria-hidden="true">STEP INTO<br />YOUR STORE</span>
       </div>
-      <div class="login-input-frame">
-        <div class="login-input-container">
-          <label>Restaurant *</label>
+    </aside>
+
+    <section class="sm-auth-side">
+      <form class="sm-auth-card" action="/admin/login" method="POST">
+        <span class="sm-eyebrow">Store administration</span>
+        <h2>Welcome back.</h2>
+        <p class="sm-auth-intro">Sign in with your SoleMate admin credentials.</p>
+
+        <div class="sm-field">
+          <label for="member-identity">Shop name</label>
           <input
+            id="member-identity"
             type="text"
             name="memberIdentity"
             class="member-nick"
-            placeholder="Username"
-            value=""
+            placeholder="Enter your shop name"
+            autocomplete="username"
             required
           />
         </div>
-        <div class="login-input-container">
-          <label>Password *</label>
+        <div class="sm-field">
+          <label for="member-password">Password</label>
           <input
+            id="member-password"
             type="password"
             name="memberPassword"
             class="member-password"
-            placeholder="Password"
-            value=""
+            placeholder="Enter your password"
+            autocomplete="current-password"
             required
           />
         </div>
-      </div>
-      <button class="login-btn btn" name="login" type="submit">Login</button>
-    </div>
-  </form>
+
+        <button class="sm-button sm-button--lime" name="login" type="submit">SIGN IN TO ADMIN</button>
+        <p class="sm-auth-meta">
+          Need a store account? <a href="/admin/signup">Create one</a>
+          <br /><a href="/admin">Back to admin home</a>
+        </p>
+      </form>
+    </section>
+  </main>
+  <script src="/js/login.js"></script>
 </body>
 
 <%- include('includes/footer') %>
