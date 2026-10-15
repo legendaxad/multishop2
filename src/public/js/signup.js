@@ -1,90 +1,82 @@
-(() => {
-  const form = document.querySelector(".sm-auth-card");
-  const imageInput = form?.querySelector(".member-image");
-  const imagePreview = form?.querySelector(".upload-img-frame");
-  const password = form?.querySelector(".member-password");
-  const confirmPassword = form?.querySelector(".confirm-password");
-  const submitButton = form?.querySelector('button[type="submit"]');
+$(function () {
+  const $form = $(".sm-auth-card");
+  const $imageInput = $form.find(".member-image");
+  const $imagePreview = $form.find(".upload-img-frame");
+  const $password = $form.find(".member-password");
+  const $confirmPassword = $form.find(".confirm-password");
+  const $submitButton = $form.find('button[type="submit"]');
   let previewUrl;
 
-  if (!(form instanceof HTMLFormElement)) return;
+  if (!$form.length) return;
 
-  const isSupportedImage = (file) =>
-    file &&
-    (["image/jpeg", "image/png"].includes(file.type) ||
-      /\.(jpe?g|png)$/i.test(file.name));
+  const isSupportedImage = (file) => {
+    return (
+      file &&
+      (["image/jpeg", "image/png"].includes(file.type) ||
+        /\.(jpe?g|png)$/i.test(file.name))
+    );
+  };
 
-  if (
-    imageInput instanceof HTMLInputElement &&
-    imagePreview instanceof HTMLImageElement
-  ) {
-    imageInput.addEventListener("change", () => {
-      const file = imageInput.files?.[0];
-      imageInput.setCustomValidity(
-        file && !isSupportedImage(file)
-          ? "Choose a JPG, JPEG, or PNG image."
-          : "",
-      );
+  // Image preview & custom validation
+  $imageInput.on("change", function () {
+    const file = this.files?.[0];
+    const message = file && !isSupportedImage(file) ? "Choose a JPG, JPEG, or PNG image." : "";
+    this.setCustomValidity(message);
 
-      if (!file || !isSupportedImage(file)) return;
+    if (!file || !isSupportedImage(file)) return;
 
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      previewUrl = URL.createObjectURL(file);
-      imagePreview.src = previewUrl;
-    });
-  }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+    $imagePreview.attr("src", previewUrl);
+  });
 
+  // Password matching validation
   const validatePasswords = () => {
-    if (
-      password instanceof HTMLInputElement &&
-      confirmPassword instanceof HTMLInputElement
-    ) {
-      confirmPassword.setCustomValidity(
-        confirmPassword.value && password.value !== confirmPassword.value
-          ? "Passwords do not match."
-          : "",
+    const pass = $password.val();
+    const confirmPass = $confirmPassword.val();
+    const confirmEl = $confirmPassword[0];
+
+    if (confirmEl) {
+      confirmEl.setCustomValidity(
+        confirmPass && pass !== confirmPass ? "Passwords do not match." : ""
       );
     }
   };
 
-  password?.addEventListener("input", validatePasswords);
-  confirmPassword?.addEventListener("input", validatePasswords);
+  $password.on("input", validatePasswords);
+  $confirmPassword.on("input", validatePasswords);
 
+  // Global validation function
   window.validateSignupForm = () => {
     validatePasswords();
 
-    if (
-      imageInput instanceof HTMLInputElement &&
-      (!imageInput.files?.[0] || !isSupportedImage(imageInput.files[0]))
-    ) {
-      imageInput.setCustomValidity(
-        imageInput.files?.[0]
-          ? "Choose a JPG, JPEG, or PNG image."
-          : "Choose a store profile image.",
+    const file = $imageInput[0]?.files?.[0];
+    const imageEl = $imageInput[0];
+
+    if (imageEl && (!file || !isSupportedImage(file))) {
+      imageEl.setCustomValidity(
+        file ? "Choose a JPG, JPEG, or PNG image." : "Choose a store profile image."
       );
     }
 
-    return form.reportValidity();
+    return $form[0].reportValidity();
   };
 
-  form.addEventListener("submit", (event) => {
+  // Form submit handler
+  $form.on("submit", (event) => {
     if (!window.validateSignupForm()) {
       event.preventDefault();
       return;
     }
 
-    if (submitButton instanceof HTMLButtonElement) {
-      submitButton.disabled = true;
-      submitButton.textContent = "CREATING ACCOUNT…";
-      form.setAttribute("aria-busy", "true");
+    if ($submitButton.length) {
+      $submitButton.prop("disabled", true).text("CREATING ACCOUNT…");
+      $form.attr("aria-busy", "true");
     }
   });
 
-  window.addEventListener(
-    "beforeunload",
-    () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    },
-    { once: true },
-  );
-})();
+  // Clean up object URL when leaving page
+  $(window).one("beforeunload", () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  });
+});

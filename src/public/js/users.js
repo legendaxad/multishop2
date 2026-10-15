@@ -1,40 +1,43 @@
-(() => {
-  document.querySelectorAll(".sm-table tbody tr").forEach((row, index) => {
-    row.style.animationDelay = `${Math.min(index * 35, 350)}ms`;
+$(function () {
+  // Stagger animation for table rows
+  $(".sm-table tbody tr").each(function (index) {
+    $(this).css("animation-delay", `${Math.min(index * 35, 350)}ms`);
   });
 
-  document.querySelectorAll(".member-status").forEach((select) => {
-    if (!(select instanceof HTMLSelectElement)) return;
-    select.dataset.savedValue = select.value;
+  // Handle member status updates
+  $(".member-status").each(function () {
+    const $select = $(this);
+    $select.data("savedValue", $select.val());
 
-    select.addEventListener("change", async () => {
-      const memberId = select.dataset.id;
-      const previousValue = select.dataset.savedValue;
+    $select.on("change", async function () {
+      const memberId = $select.attr("data-id");
+      const previousValue = $select.data("savedValue");
 
       if (!memberId) {
         window.alert(
-          "This customer is missing its account ID. The status was not saved.",
+          "This customer is missing its account ID. The status was not saved."
         );
-        select.value = previousValue || "";
+        $select.val(previousValue || "");
         return;
       }
 
       if (
-        select.value === "DELETE" &&
+        $select.val() === "DELETE" &&
         !window.confirm("Mark this customer account as deleted?")
       ) {
-        select.value = previousValue || "";
+        $select.val(previousValue || "");
         return;
       }
 
-      select.disabled = true;
+      $select.prop("disabled", true);
+
       try {
         const response = await fetch("/admin/user/edit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             _id: memberId,
-            memberStatus: select.value,
+            memberStatus: $select.val(),
           }),
         });
 
@@ -49,17 +52,17 @@
           throw new Error(message || "The status update failed.");
         }
 
-        select.dataset.savedValue = select.value;
+        $select.data("savedValue", $select.val());
       } catch (error) {
-        select.value = previousValue || "";
+        $select.val(previousValue || "");
         window.alert(
           error instanceof Error
             ? `Could not update customer status: ${error.message}`
-            : "Could not update customer status.",
+            : "Could not update customer status."
         );
       } finally {
-        select.disabled = false;
+        $select.prop("disabled", false);
       }
     });
   });
-})();
+});
