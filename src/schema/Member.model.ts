@@ -40,6 +40,7 @@ const memberSchema = new Schema<Member>(
     },
     memberPoint: {
       type: Number,
+      default: 0,
     },
   },
   {

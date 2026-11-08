@@ -1,4 +1,4 @@
-import { MemberType } from "../libs/enums/member";
+import { MemberStatus, MemberType } from "../libs/enums/member";
 import Errors, { HttpCode, Message } from "../libs/Error";
 import {
   LoginInput,
@@ -61,6 +61,39 @@ class MemberService {
       .findById(member._id)
       .lean()
       .exec()) as Member;
+  }
+  public async getMemberDetail(member: Member): Promise<Member> {
+    const memberId = shapeIntoMongooseObjectId(member._id);
+    const result = await this.memberModel
+      .findOne({ _id: memberId, memberStatus: MemberStatus.ACTIVE })
+      .exec();
+    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+    return result as Member;
+  }
+  public async updateMember(
+    member: Member,
+    input: MemberUpdateInput,
+  ): Promise<Member> {
+    const memberId = shapeIntoMongooseObjectId(member._id);
+    const result = await this.memberModel.findByIdAndUpdate(
+      { _id: memberId },
+      input,
+      { new: true },
+    );
+    if (!result) throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
+    return result;
+  }
+  public async getTopUsers(): Promise<Member[]> {
+    const result = this.memberModel
+      .find({
+        memberStatus: MemberStatus.ACTIVE,
+        memberPoint: { $gte: 1 },
+      })
+      .sort({ memberPoint: "desc" })
+      .limit(4)
+      .exec();
+    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+    return result;
   }
 
   //SSR -ADMIN
