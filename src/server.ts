@@ -1,8 +1,7 @@
-import dotenv from "dotenv";
-import app from "./app";
+import "dotenv/config";
 import mongoose from "mongoose";
-
-dotenv.config();
+import app from "./app";
+mongoose.set("strictQuery", false);
 
 mongoose.set("strictQuery", false);
 mongoose

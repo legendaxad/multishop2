@@ -24,20 +24,20 @@ routerAdmin.get("/check-me", adminController.checkout);
 
 routerAdmin.get(
   "/product/all",
-  adminController.verifyRestaurant,
+  adminController.verifyShop,
   productController.getAllProducts,
 );
 
 routerAdmin.post(
   "/product/create",
-  adminController.verifyRestaurant,
+  adminController.verifyShop,
   makeUploader("products").array("productImages", 5),
   // uploadProductImage.single("productImage"),
   productController.createNewProduct,
 );
 routerAdmin.post(
   "/product/:id",
-  adminController.verifyRestaurant,
+  adminController.verifyShop,
   makeUploader("products").array("productImages", 5),
   productController.updateChosenProduct,
 );
@@ -46,13 +46,13 @@ routerAdmin.post(
 
 routerAdmin.get(
   "/user/all",
-  adminController.verifyRestaurant,
+  adminController.verifyShop,
   adminController.getUsers,
 );
 
 routerAdmin.post(
   "/user/edit",
-  adminController.verifyRestaurant,
+  adminController.verifyShop,
   adminController.updateChosenUser,
 );
 

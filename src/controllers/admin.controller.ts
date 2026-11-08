@@ -1,6 +1,6 @@
 import { T } from "../libs/types/common";
 import { NextFunction, Request, Response } from "express";
-import MemberService from "../model/model.service";
+import MemberService from "../model/Member.service";
 import { AdminRequest, LoginInput, MemberInput } from "../libs/types/member";
 import { MemberType } from "../libs/enums/member";
 import Errors, { HttpCode, Message } from "../libs/Error";
@@ -117,7 +117,7 @@ adminController.checkout = async (req: AdminRequest, res: Response) => {
     res.redirect("/admin");
   }
 };
-adminController.verifyRestaurant = async (
+adminController.verifyShop = async (
   req: AdminRequest,
   res: Response,
   next: NextFunction,
@@ -128,7 +128,7 @@ adminController.verifyRestaurant = async (
   } else {
     const message = Message.NOT_AUTHENTICATED;
     res.send(
-      `<script>alert('Welcome, ${message}!'); window.location.replace('/admin/login')</script>`,
+      `<script>alert('Welcome,you are  ${message}!'); window.location.replace('/admin/login')</script>`,
     );
   }
 };
