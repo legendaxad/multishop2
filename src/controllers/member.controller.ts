@@ -1,6 +1,11 @@
 import { T } from "../libs/types/common";
 import { Request, Response } from "express";
-import { LoginInput, Member, MemberInput } from "../libs/types/member";
+import {
+  ExtendedRequest,
+  LoginInput,
+  Member,
+  MemberInput,
+} from "../libs/types/member";
 import MemberService from "../model/Member.service";
 import Errors, { HttpCode } from "../libs/Error";
 import { AUTH_TIMER } from "../libs/config";
@@ -44,5 +49,16 @@ memberController.login = async (req: Request, res: Response) => {
     else res.status(Errors.standard.code).json(Errors.standard);
   }
 };
-
+memberController.logout = async (req: ExtendedRequest, res: Response) => {
+  try {
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      path: "/",
+    });
+    res.status(HttpCode.OK).json({ logout: true });
+  } catch (error) {
+    if (error instanceof Errors) res.status(error.code).json(error);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
 export default memberController;
