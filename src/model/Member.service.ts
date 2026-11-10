@@ -95,6 +95,23 @@ class MemberService {
     if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
     return result;
   }
+  public async addUserPoint(member: Member, point: number): Promise<Member> {
+    const memberId = shapeIntoMongooseObjectId(member._id);
+    const result = await this.memberModel
+      .findByIdAndUpdate(
+        {
+          _id: memberId,
+          memberType: MemberType.USER,
+          memberStatus: MemberStatus.ACTIVE,
+        },
+        { $inc: { memberPoint: point } },
+        { new: true },
+      )
+      .lean()
+      .exec();
+    if (!result) throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
+    return result;
+  }
 
   //SSR -ADMIN
 

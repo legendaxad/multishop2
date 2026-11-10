@@ -3,7 +3,7 @@ import { T } from "../libs/types/common";
 import Errors, { HttpCode, Message } from "../libs/Error";
 import { AdminRequest } from "../libs/types/member";
 import { ProductInput, ProductUpdateInput } from "../libs/types/product";
-import ProductService from "../model/product.service";
+import ProductService from "../model/Product.service";
 
 const productController: T = {};
 const productService = new ProductService();
