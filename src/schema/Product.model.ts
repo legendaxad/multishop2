@@ -1,6 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 import { Product } from "../libs/types/product";
-import { ProductCollection, ProductStatus } from "../libs/enums/product.enums";
+import {
+  ProductCollection,
+  ProductSize,
+  ProductStatus,
+} from "../libs/enums/product.enums";
 
 const productSchema = new Schema<Product>(
   {
@@ -40,6 +44,9 @@ const productSchema = new Schema<Product>(
 
     productSizes: {
       type: [Number],
+      enum: Object.values(ProductSize).filter(
+        (value) => typeof value === "number",
+      ),
       required: true,
     },
 

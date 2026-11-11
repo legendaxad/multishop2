@@ -8,8 +8,7 @@ import {
   ProductUpdateInput,
 } from "../libs/types/product";
 import ProductService from "../model/Product.service";
-import { ProductCollection } from "../libs/enums/product.enums";
-
+import { ProductCollection, ProductSize } from "../libs/enums/product.enums";
 const productController: T = {};
 const productService = new ProductService();
 // SPA
@@ -41,8 +40,8 @@ productController.getProduct = async (req: ExtendedRequest, res: Response) => {
     console.log("getProduct");
     const { id } = req.params,
       memberId = req.member?._id ?? null;
-    // const result = await productService.getProducts(memberId, id);
-    // res.status(HttpCode.OK).json(result);
+    const result = await productService.getProduct(memberId, id);
+    res.status(HttpCode.OK).json(result);
   } catch (err) {
     console.error("Error getProducts page:", err);
     if (err instanceof Errors) res.status(err.code).json(err);
@@ -66,26 +65,49 @@ productController.createNewProduct = async (
   res: Response,
 ) => {
   console.log("createNewProduct");
+
   try {
-    if (!req.files?.length)
+    if (!req.files?.length) {
       throw new Errors(HttpCode.INTERNAL_SERVER_ERROR, Message.CREATE_FAILED);
+    }
+
     const data: ProductInput = req.body;
-    data.productImages = req.files.map((ele) => {
-      return ele.path;
-    });
-    ((data.productSizes = req.body.productSizes
+
+    // Convert uploaded images into paths
+    data.productImages = req.files.map((ele) => ele.path);
+
+    // Convert string sizes into numbers
+    data.productSizes = req.body.productSizes
       .split(",")
-      .map((size: string) => Number(size.trim()))),
-      await productService.createNewProduct(data));
+      .map((size: string) => Number(size.trim()));
+    const allowedSizes = Object.values(ProductSize).filter(
+      (size): size is number => typeof size === "number",
+    );
+
+    if (data.productSizes.some((size) => !allowedSizes.includes(size))) {
+      throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
+    }
+
+    // Create product
+    await productService.createNewProduct(data);
+
     res.send(
-      `<script>alert('Successful creation!'); window.location.replace('/admin/product/all')</script>`,
+      `<script>
+        alert('Successful creation!');
+        window.location.replace('/admin/product/all');
+      </script>`,
     );
   } catch (err) {
+    console.error("createNewProduct error:", err);
+
     const message =
       err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
 
     res.send(
-      `<script>alert('${message} !'); window.location.replace('/admin/product/all')</script>`,
+      `<script>
+        alert('${message}!');
+        window.location.replace('/admin/product/all');
+      </script>`,
     );
   }
 };
@@ -95,17 +117,42 @@ productController.updateChosenProduct = async (
 ) => {
   try {
     console.log("updateChosenProduct");
+
     const id = req.params.id;
     const data: ProductUpdateInput = req.body;
+
     if (req.files?.length) {
       data.productImages = req.files.map((ele) => ele.path);
     }
+
+    // Convert and validate product sizes
+    if (req.body.productSizes) {
+      const productSizes: number[] = req.body.productSizes
+        .split(",")
+        .map((size: string) => Number(size.trim()));
+
+      const allowedSizes = Object.values(ProductSize).filter(
+        (size): size is number => typeof size === "number",
+      );
+
+      if (productSizes.some((size) => !allowedSizes.includes(size))) {
+        throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
+      }
+
+      data.productSizes = productSizes;
+    }
+
     const result = await productService.updateChosenProduct(id, data);
+
     res.status(HttpCode.OK).json({ data: result });
   } catch (err) {
     console.error("Error updateChosenProduct page:", err);
-    if (err instanceof Errors) res.status(err.code).json(err);
-    else res.status(Errors.standard.code).json(Errors.standard);
+
+    if (err instanceof Errors) {
+      res.status(err.code).json(err);
+    } else {
+      res.status(Errors.standard.code).json(Errors.standard);
+    }
   }
 };
 

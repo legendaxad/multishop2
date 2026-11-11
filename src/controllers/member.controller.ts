@@ -104,10 +104,7 @@ memberController.verifyAuth = async (
   next: NextFunction,
 ) => {
   try {
-    console.log("keldik verifyAuth", req.cookies);
-
     const token = req.cookies["accessToken"];
-    console.log("keldik verifyAuth", token);
     if (token) req.member = await authService.checkAuth(token);
     if (!req.member)
       throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTHENTICATED);

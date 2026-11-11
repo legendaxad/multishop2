@@ -1,4 +1,4 @@
-import { MemberStatus, MemberType } from "../libs/enums/member";
+import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Error";
 import {
   LoginInput,
