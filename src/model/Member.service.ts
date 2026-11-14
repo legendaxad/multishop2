@@ -48,6 +48,7 @@ class MemberService {
       memberPassword: input.memberPassword,
       memberAddress: input.memberAddress,
       memberDesc: input.memberDesc,
+      memberImage: input.memberImage,
       memberType: MemberType.USER,
       memberPoint: 0,
     };
@@ -152,10 +153,14 @@ class MemberService {
   }
   public async getTopUsers(): Promise<Member[]> {
     const result = this.memberModel
-      .find({
-        memberStatus: MemberStatus.ACTIVE,
-        memberPoint: { $gte: 1 },
-      })
+      .find(
+        {
+          memberStatus: MemberStatus.ACTIVE,
+          memberPoint: { $gte: 1 },
+        },
+        // Public leaderboard: never expose phone, address or other private fields
+        { memberNick: 1, memberImage: 1, memberPoint: 1 },
+      )
       .sort({ memberPoint: "desc" })
       .limit(4)
       .exec();

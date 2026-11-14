@@ -9,7 +9,11 @@ const router = express.Router();
 // Member
 router.get("/member/shop", memberController.getShop);
 router.post("/member/login", memberController.login);
-router.post("/member/signup", memberController.signup);
+router.post(
+  "/member/signup",
+  makeUploader("members").single("memberImage"),
+  memberController.signup,
+);
 // No verifyAuth: logout must clear the cookie even when the token has expired
 router.post("/member/logout", memberController.logout);
 

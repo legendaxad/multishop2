@@ -649,3 +649,101 @@ describe("checkout and orders", () => {
     assert.equal(await stock(ids.laces), before);
   });
 });
+
+describe("homepage data: views ranking and top customers", () => {
+  test("product views are counted once per member and drive order=productViews", async () => {
+    const viewerA = await signupCustomer("viewer_a", "01060006000");
+    const viewerB = await signupCustomer("viewer_b", "01070007000");
+    const before = await call("GET", `/product/${ids.laces}`);
+    // Anonymous views are not counted
+    assert.equal((await call("GET", `/product/${ids.laces}`)).body.productViews, before.body.productViews);
+
+    await call("GET", `/product/${ids.trainer}`, { cookie: viewerA });
+    await call("GET", `/product/${ids.trainer}`, { cookie: viewerA }); // repeat view: not counted twice
+    await call("GET", `/product/${ids.trainer}`, { cookie: viewerB });
+    await call("GET", `/product/${ids.laces}`, { cookie: viewerA });
+
+    const ranked = await call("GET", "/product/all?order=productViews&limit=4");
+    assert.equal(ranked.status, 200);
+    const views = ranked.body.map((p: any) => p.productViews);
+    assert.deepEqual(views, [...views].sort((a: number, b: number) => b - a));
+    assert.equal(ranked.body[0].productName, "Weird (Name) Trainer");
+    assert.equal(ranked.body[0].productViews, 2);
+  });
+
+  test("top users only expose public leaderboard fields", async () => {
+    const res = await call("GET", "/member/top-users");
+    assert.equal(res.status, 200);
+    assert.ok(res.body.length >= 1);
+    for (const member of res.body) {
+      assert.deepEqual(
+        Object.keys(member).filter((key) => !["_id", "memberNick", "memberImage", "memberPoint"].includes(key)),
+        [],
+      );
+      assert.ok(member.memberPoint >= 1);
+    }
+    const points = res.body.map((m: any) => m.memberPoint);
+    assert.deepEqual(points, [...points].sort((a: number, b: number) => b - a));
+  });
+});
+
+describe("signup with an optional profile image", () => {
+  const png = () => new Blob([Buffer.from("89504e470d0a1a0a", "hex")], { type: "image/png" });
+
+  test("multipart signup stores the uploaded image and serves it", async () => {
+    const form = new FormData();
+    form.append("memberNick", "photo_user");
+    form.append("memberPhone", "01080008000");
+    form.append("memberPassword", "secret12");
+    form.append("memberType", "ADMIN");
+    form.append("memberPoint", "500");
+    form.append("memberImage", png(), "me.png");
+    const res = await call("POST", "/member/signup", { body: form });
+    assert.equal(res.status, 201, res.text);
+    assert.equal(res.body.member.memberType, "USER");
+    assert.equal(res.body.member.memberPoint, 0);
+    assert.equal("memberPassword" in res.body.member, false);
+    assert.match(res.body.member.memberImage, /^uploads\/members\/.+\.png$/);
+    createdUploads.push(path.resolve(res.body.member.memberImage));
+    assert.ok(res.cookies.some((c) => c.startsWith("accessToken=")));
+    const image = await call("GET", "/" + res.body.member.memberImage);
+    assert.equal(image.status, 200);
+  });
+
+  test("JSON signup without an image still works and ignores a client image path", async () => {
+    const res = await call("POST", "/member/signup", {
+      body: { memberNick: "no_photo", memberPhone: "01090009000", memberPassword: "secret12", memberImage: "uploads/members/someone-else.png" },
+    });
+    assert.equal(res.status, 201);
+    assert.equal(res.body.member.memberImage, undefined);
+  });
+
+  test("non-image uploads are rejected and the file is removed", async () => {
+    const dir = path.resolve("uploads/members");
+    const beforeFiles = fs.readdirSync(dir).length;
+    const form = new FormData();
+    form.append("memberNick", "bad_upload");
+    form.append("memberPhone", "01011110000");
+    form.append("memberPassword", "secret12");
+    form.append("memberImage", new Blob(["not an image"], { type: "text/plain" }), "note.txt");
+    const res = await call("POST", "/member/signup", { body: form });
+    assert.equal(res.status, 400);
+    assert.equal(await MemberModel.exists({ memberNick: "bad_upload" }), null);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.equal(fs.readdirSync(dir).length, beforeFiles);
+  });
+
+  test("failed signup (duplicate nickname) removes the uploaded image", async () => {
+    const dir = path.resolve("uploads/members");
+    const beforeFiles = fs.readdirSync(dir).length;
+    const form = new FormData();
+    form.append("memberNick", "photo_user");
+    form.append("memberPhone", "01022220000");
+    form.append("memberPassword", "secret12");
+    form.append("memberImage", png(), "dup.png");
+    const res = await call("POST", "/member/signup", { body: form });
+    assert.equal(res.status, 400);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.equal(fs.readdirSync(dir).length, beforeFiles);
+  });
+});

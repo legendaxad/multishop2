@@ -25,19 +25,31 @@ const cookieOptions: CookieOptions = {
   secure: process.env.NODE_ENV === "production",
   path: "/",
 };
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
 memberController.getShop = async (req: Request, res: Response) => {
   const result = await memberService.getShop();
   res.status(HttpCode.OK).json(result);
 };
-memberController.signup = async (req: Request, res: Response) => {
+memberController.signup = async (req: ExtendedRequest, res: Response) => {
   try {
-    const input: MemberInput = req.body,
-      result: Member = await memberService.signup(input),
+    const input: MemberInput = req.body;
+    // Profile image is optional and only accepted as an uploaded file
+    input.memberImage = undefined;
+    if (req.file) {
+      if (
+        !req.file.mimetype.startsWith("image/") ||
+        req.file.size > MAX_IMAGE_SIZE
+      )
+        throw new Errors(HttpCode.BAD_REQUEST, Message.INVALID_IMAGE);
+      input.memberImage = req.file.path.replace(/\\/g, "/");
+    }
+    const result: Member = await memberService.signup(input),
       token = await authService.createToken(result);
     res.cookie("accessToken", token, cookieOptions);
 
     res.status(HttpCode.CREATED).json({ member: result });
   } catch (error) {
+    if (req.file) fs.unlink(req.file.path, () => {});
     if (error instanceof Errors) res.status(error.code).json(error);
     else res.status(Errors.standard.code).json(Errors.standard);
   }
