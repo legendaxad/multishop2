@@ -9,6 +9,7 @@ import {
 } from "../libs/types/product";
 import ProductService from "../model/Product.service";
 import { ProductCollection, ProductSize } from "../libs/enums/product.enums";
+import { isValidObjectId } from "../libs/utils/validation";
 const productController: T = {};
 const productService = new ProductService();
 // SPA
@@ -37,7 +38,7 @@ productController.getProductsCount = async (req: Request, res: Response) => {
   }
 };
 function getProductInquiry(req: Request): ProductInquiry {
-  const { page, limit, order, productCollection, search } = req.query;
+  const { page, limit, order, productCollection, search, ids } = req.query;
   const inquiry: ProductInquiry = {
     order: String(order),
     page: Math.max(Math.floor(Number(page)) || 1, 1),
@@ -54,6 +55,13 @@ function getProductInquiry(req: Request): ProductInquiry {
   }
   if (search) {
     inquiry.search = String(search).trim().slice(0, 100);
+  }
+  // Comma-separated product ids (wishlist / recently viewed); does not count views
+  if (ids) {
+    const list = String(ids).split(",").filter(Boolean);
+    if (list.length > 50 || !list.every((id) => isValidObjectId(id)))
+      throw new Errors(HttpCode.BAD_REQUEST, Message.INVALID_FILTER);
+    inquiry.ids = list;
   }
   return inquiry;
 }

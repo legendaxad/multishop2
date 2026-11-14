@@ -68,6 +68,9 @@ class ProductService {
       const search = new RegExp(escapeRegex(inquiry.search), "i");
       match.$or = [{ productName: search }, { productBrand: search }];
     }
+    if (inquiry.ids) {
+      match._id = { $in: inquiry.ids.map(shapeIntoMongooseObjectId) };
+    }
     return match;
   }
   public async getProduct(

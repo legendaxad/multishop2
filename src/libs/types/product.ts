@@ -52,4 +52,5 @@ export interface ProductInquiry {
   limit: number;
   productCollection?: ProductCollection;
   search?: string;
+  ids?: string[];
 }

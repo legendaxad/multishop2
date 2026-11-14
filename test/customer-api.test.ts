@@ -671,6 +671,17 @@ describe("homepage data: views ranking and top customers", () => {
     assert.equal(ranked.body[0].productViews, 2);
   });
 
+  test("ids filter returns only those available products and never counts views", async () => {
+    const viewer = await signupCustomer("ids_viewer", "01033330000");
+    const before = (await ProductModel.findById(ids.runner).lean<any>()).productViews;
+    const res = await call("GET", `/product/all?ids=${ids.runner},${ids.paused},${ids.court}&limit=50`, { cookie: viewer });
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.body.map((p: any) => p._id).sort(), [ids.runner, ids.court].sort());
+    assert.equal((await ProductModel.findById(ids.runner).lean<any>()).productViews, before);
+    const invalid = await call("GET", "/product/all?ids=abc");
+    assert.equal(invalid.status, 400);
+  });
+
   test("top users only expose public leaderboard fields", async () => {
     const res = await call("GET", "/member/top-users");
     assert.equal(res.status, 200);
