@@ -9,6 +9,7 @@ import ConnectMongoDB from "connect-mongodb-session";
 import dotenv from "dotenv";
 import { T } from "./libs/types/common";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 dotenv.config();
 
 const MongoDBStrore = ConnectMongoDB(session);
@@ -18,6 +19,12 @@ const store = new MongoDBStrore({
 });
 //1. Entrance
 const app = express();
+app.use(
+  cors({
+    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use(express.urlencoded({ extended: true }));
