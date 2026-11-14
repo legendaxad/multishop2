@@ -10,11 +10,8 @@ const router = express.Router();
 router.get("/member/shop", memberController.getShop);
 router.post("/member/login", memberController.login);
 router.post("/member/signup", memberController.signup);
-router.post(
-  "/member/logout",
-  memberController.verifyAuth,
-  memberController.logout,
-);
+// No verifyAuth: logout must clear the cookie even when the token has expired
+router.post("/member/logout", memberController.logout);
 
 router.get(
   "/member/detail",
@@ -31,6 +28,7 @@ router.post(
 router.get("/member/top-users", memberController.getTopUsers);
 // Product
 router.get("/product/all", productController.getProducts);
+router.get("/product/count", productController.getProductsCount);
 router.get(
   "/product/:id",
   memberController.retrieveAuth,

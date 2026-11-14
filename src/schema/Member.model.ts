@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 import { Member } from "../libs/types/member";
+import deliveryAddressSchema from "./DeliveryAddress.schema";
 
 const memberSchema = new Schema<Member>(
   {
@@ -37,6 +38,10 @@ const memberSchema = new Schema<Member>(
     },
     memberImage: {
       type: String,
+    },
+    memberDeliveryAddress: {
+      type: deliveryAddressSchema,
+      required: false,
     },
     memberPoint: {
       type: Number,

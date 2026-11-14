@@ -2,6 +2,19 @@ import { MemberStatus, MemberType } from "../enums/member.enum";
 import { ObjectId, Types } from "mongoose";
 import { Request } from "express";
 import { Session } from "express-session";
+
+/** Structured delivery address (customer profile default and order snapshot). */
+export interface DeliveryAddress {
+  recipientName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  region?: string;
+  postalCode?: string;
+  country: string;
+}
+
 export interface Member {
   _id: Types.ObjectId;
   memberType: MemberType;
@@ -12,6 +25,7 @@ export interface Member {
   memberAddress?: string;
   memberDesc?: string;
   memberImage?: string;
+  memberDeliveryAddress?: DeliveryAddress;
   memberPoint: number;
   createdAt: Date;
   updatedAt: Date;
@@ -39,9 +53,10 @@ export interface MemberUpdateInput {
   memberNick?: string;
   memberPhone?: string;
   memberPassword?: string;
-  memberAdress?: string;
+  memberAddress?: string;
   memberDesc?: string;
   memberImage?: string;
+  memberDeliveryAddress?: DeliveryAddress;
 }
 export interface ExtendedRequest extends Request {
   member: Member;

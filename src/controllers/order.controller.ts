@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { T } from "../libs/types/common";
 import { ExtendedRequest } from "../libs/types/member";
-import Errors, { HttpCode } from "../libs/Error";
+import Errors, { HttpCode, Message } from "../libs/Error";
 import OrderServive from "../model/Order.service";
 import { OrderInquiry, OrderUpdateInput } from "../libs/types/order";
 import { OrderStatus } from "../libs/enums/order.enum";
@@ -24,9 +24,14 @@ orderController.getMyOrders = async (req: ExtendedRequest, res: Response) => {
   try {
     console.log("getMyOrders");
     const { page, limit, orderStatus } = req.query;
+    if (
+      orderStatus &&
+      !Object.values(OrderStatus).includes(orderStatus as OrderStatus)
+    )
+      throw new Errors(HttpCode.BAD_REQUEST, Message.INVALID_FILTER);
     const inquiry: OrderInquiry = {
-      page: Number(page) || 1,
-      limit: Number(limit) || 10,
+      page: Math.max(Math.floor(Number(page)) || 1, 1),
+      limit: Math.min(Math.max(Math.floor(Number(limit)) || 10, 1), 50),
       orderStatus: orderStatus as OrderStatus,
     };
     const result = await orderServive.getMyOrders(req.member, inquiry);

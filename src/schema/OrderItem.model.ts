@@ -11,6 +11,11 @@ const orderItemSchema = new Schema(
       type: Number,
       required: true,
     },
+    // EU shoe size chosen by the customer (optional for legacy items and
+    // products without sizes).
+    itemSize: {
+      type: Number,
+    },
     orderId: {
       type: Schema.Types.ObjectId,
       ref: "Order",
